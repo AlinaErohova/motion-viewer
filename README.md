@@ -7,6 +7,7 @@ A local desktop Lottie viewer / inspector for `.json` and `.lottie` animations.
 - Open files with Finder / right-click → Open With
 - Native file picker with multi-select
 - Drag & drop `.json` / `.lottie`
+- Batch export to `.json` or `.lottie` at the original or a custom size
 - Playback, pause, reset, frame stepping and timeline scrubbing
 - Speed controls
 - Checkerboard / light / dark backgrounds

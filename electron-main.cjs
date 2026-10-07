@@ -1,6 +1,7 @@
 const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs/promises');
+const { convertAnimation } = require('./lottie-export.cjs');
 
 let mainWindow;
 let pendingPaths = [];
@@ -27,6 +28,57 @@ async function sendPaths(paths) {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   const files = await filesForPaths(paths);
   if (files.length) mainWindow.webContents.send('files:opened', files);
+}
+
+async function uniquePath(directory, filename) {
+  const extension = path.extname(filename);
+  const base = path.basename(filename, extension);
+  let candidate = path.join(directory, filename);
+  let index = 1;
+  while (true) {
+    try {
+      await fs.access(candidate);
+      candidate = path.join(directory, `${base} (${index++})${extension}`);
+    } catch {
+      return candidate;
+    }
+  }
+}
+
+async function exportFiles(request) {
+  const items = Array.isArray(request?.items) ? request.items : [];
+  if (!items.length) throw new Error('No animations selected for export.');
+  if (!['json', 'lottie'].includes(request.format)) throw new Error('Unsupported export format.');
+  if (!['original', 'custom'].includes(request.size)) throw new Error('Unsupported export size.');
+
+  const converted = items.map((item) => convertAnimation(item, request));
+
+  if (converted.length === 1) {
+    const result = await dialog.showSaveDialog(mainWindow, {
+      title: 'Export animation',
+      defaultPath: converted[0].name,
+      filters: [{
+        name: request.format === 'json' ? 'Lottie JSON' : 'dotLottie',
+        extensions: [request.format],
+      }],
+    });
+    if (result.canceled || !result.filePath) return { canceled: true, count: 0 };
+    await fs.writeFile(result.filePath, converted[0].data);
+    return { canceled: false, count: 1, directory: path.dirname(result.filePath) };
+  }
+
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: `Export ${converted.length} animations`,
+    properties: ['openDirectory', 'createDirectory'],
+  });
+  if (result.canceled || !result.filePaths[0]) return { canceled: true, count: 0 };
+
+  const directory = result.filePaths[0];
+  for (const item of converted) {
+    const destination = await uniquePath(directory, item.name);
+    await fs.writeFile(destination, item.data);
+  }
+  return { canceled: false, count: converted.length, directory };
 }
 
 function createWindow() {
@@ -71,6 +123,8 @@ app.whenReady().then(() => {
     if (result.canceled) return [];
     return filesForPaths(result.filePaths);
   });
+
+  ipcMain.handle('files:export', (_event, request) => exportFiles(request));
 
   ipcMain.handle('app:show-in-finder', (_event, filePath) => shell.showItemInFolder(filePath));
   createWindow();

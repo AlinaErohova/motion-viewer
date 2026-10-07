@@ -13,6 +13,7 @@
     "dist:app": "npm run build:renderer && electron-builder --mac dir"
   },
   "dependencies": {
+    "@lottiefiles/dotlottie-io": "^0.0.4",
     "@lottiefiles/dotlottie-web": "latest",
     "lucide-react": "latest",
     "react": "latest",
@@ -36,6 +37,7 @@
       "dist/**/*",
       "electron-main.cjs",
       "electron-preload.cjs",
+      "lottie-export.cjs",
       "package.json"
     ],
     "asar": true,
