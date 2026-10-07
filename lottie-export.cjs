@@ -127,7 +127,7 @@ function buildDotLottie(data, name) {
   const id = animationId(name);
   const builder = new DotLottieBuilder();
   builder.version('2');
-  builder.generator('Motion Viewer 0.2.0');
+  builder.generator('Motion Viewer 0.3.0');
   builder.addAnimation(id, JSON.stringify(data), { name: safeBaseName(name) });
   builder.initialAnimation(id);
   return builder.build().toBytes();
