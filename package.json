@@ -1,0 +1,62 @@
+{
+  "name": "lottie-motion-viewer",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron:dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && cross-env ELECTRON_DEV=1 electron .\"",
+    "build:renderer": "vite build",
+    "dist:mac": "npm run build:renderer && electron-builder --mac dmg",
+    "dist:app": "npm run build:renderer && electron-builder --mac dir"
+  },
+  "dependencies": {
+    "@lottiefiles/dotlottie-web": "latest",
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "latest",
+    "concurrently": "latest",
+    "cross-env": "latest",
+    "electron": "^40.8.0",
+    "electron-builder": "^26.5.0",
+    "typescript": "latest",
+    "vite": "latest",
+    "wait-on": "latest"
+  },
+  "main": "electron-main.cjs",
+  "build": {
+    "appId": "com.motionviewer.app",
+    "productName": "Motion Viewer",
+    "files": [
+      "dist/**/*",
+      "electron-main.cjs",
+      "electron-preload.cjs",
+      "package.json"
+    ],
+    "asar": true,
+    "mac": {
+      "category": "public.app-category.graphics-design",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "identity": "-",
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "icon": "build/icon.icns"
+    },
+    "dmg": {
+      "title": "Motion Viewer",
+      "artifactName": "Motion Viewer-${version}-arm64.dmg"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Logs and caches
+*.log
+.vite/
+
+# macOS
+.DS_Store
+
+# Editors
+.idea/
+.vscode/
